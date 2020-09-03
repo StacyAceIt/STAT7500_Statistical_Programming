@@ -1,0 +1,12 @@
+Data phone;
+IF _N_ = 1 THEN PATTERN = PRXPARSE("/\w *\d/");
+RETAIN PATTERN;
+INPUT STRING $CHAR40.;
+  IF PRXMATCH(PATTERN,STRING) THEN OUTPUT;
+DATALINES;
+ theta 1
+ gamma1
+ sally
+ PROC PRINT DATA=PHONE NOOBS;
+ TITLE "Listing of Data Set Phone";
+ run;
