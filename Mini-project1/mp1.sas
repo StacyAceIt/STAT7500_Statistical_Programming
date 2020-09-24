@@ -80,8 +80,7 @@ data adae;
 	retain SUBJID Visit_Date IPISSUED TRTSDT;
 	format TRTSDT date9.;
 	set adae;
-	
-	if IPISSUED = '2' then TRTSDT =. ;
+
 	if IPISSUED = '1' then do;
 		by SUBJID;
 		if first.SUBJID then TRTSDT = Visit_Date;
@@ -99,7 +98,6 @@ data adae;
 	format TRTEDT date9.;
 	set adae;
 	
-	if IPISSUED = '2' then TRTEDT =. ;
 	if IPISSUED = '1' then do;
 		by SUBJID;
 		if first.SUBJID then TRTEDT = Visit_Date;
