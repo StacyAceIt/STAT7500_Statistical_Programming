@@ -42,6 +42,11 @@ data mp1.adae;
 	by SUBJID;
 run;
 
+data mp1.adae2;
+	merge dm ex;
+	by SUBJID;
+run;
+
 data adae;
 	set mp1.adae;
 run;
