@@ -297,39 +297,51 @@ proc sort data=advs_ out=advs_1;
 	by SUBJID PARAMN VISIT;
 run;
 
-data advs_;
+
+data advs_2;
 	retain SUBJID temp PARAMN ABLFL BASE AVAL CHG;
 	set advs_1;
 	format CHG 8.1;
-	
+   
+    if AVAL eq '--' then AVALn=.;
+    if AVAL ne '--' then AVALn=input(AVAL,6.);
+    
+    /* cannot directly change type like AVAL = input(AVAL,6.); */   
 
-	/*
-	if ABLFL='YES' and AVAL ne '--' then
-		BASE=AVAL;
+	if ABLFL='YES' and AVALn ne . then
+		BASE=AVALn;
 	else
-		BASE='';
-	by SUBJID PARAMN;
+		BASE=.;
 
+	by SUBJID PARAMN;
 	if first.PARAMN then
 		temp=BASE;
 	else
 		BASE=temp;
 	drop temp;
 
-	if AVAL ne '--' and BASE ne '' then
-		CHG=AVAL - BASE;
+
+	if AVALn ne . and BASE ne . then
+		CHG=AVALn - BASE;
 	else
 		CHG=.;
-	*/
+    
+    drop AVAL;
+    rename AVALn = AVAL;
+    
+    /*
+    %gettype(AVALn);
+    drop AVALn_;
+    %gettype(AVAL);
+    drop AVAL_;
+    */
+run;
+
+proc print data=advs_2(obs = 10);
 run;
 
 
-
-proc print data=advs_(obs = 10);
-run;
-
-
-data advs_;
+data advs_2;
 	label SUBJID='Subject Identifier' BRTHDT='Birth Date' AGE='Age' 
 		AGECAT='Age Category' RACE='Race' SEX='Sex' ETHNIC='Ethnicity' 
 		TRTSDT='Treatment Start Date' TRTEDT='Treatment End Date' 
@@ -337,14 +349,14 @@ data advs_;
 		PARAMN='Vital Signs Assessment Date' PARAM='Parameter' 
 		ABLFL='Baseline Flag for Analysis' AVAL='Analysis Value' 
 		BASE='Baseline Value' CHG='Change from Baseline';
-	set advs_;
+	set advs_2;
 	retain SUBJID BRTHDT AGE AGECAT RACE SEX ETHNIC TRTSDT TRTEDT VISITNUM VISIT 
 		VSDT PARAMN PARAM ABLFL AVAL BASE CHG;
 run;
 
-proc print data=advs_ ;
+proc print data=advs_2;
 run;
 
-proc sort data=advs_ noduprecs out=out.advs_;
+proc sort data=advs_2 noduprecs out=out.advs_1;
 	by SUBJID PARAMN VISITNUM;
 run;
