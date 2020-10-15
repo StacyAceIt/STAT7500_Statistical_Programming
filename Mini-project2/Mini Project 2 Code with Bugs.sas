@@ -31,7 +31,7 @@ data dm;
 run;
 
 data dm1;
-  format ETHNIC $22. BRTHDATE date10.;
+  format ETHNIC $22.;
   set dm;
   ETHNIC = ETHNIC_;
   
@@ -105,18 +105,21 @@ data ae;
   set out.ae;
   if DATE_OF_ONSET ne . then AESDT = DATE_OF_ONSET;
   else AESDT = .;
-  if DATE_OF_RESOLUTION ne '-' then do;
-     AEENDDY = input(scan(DATE_OF_RESOLUTION,2,' '),best8.);
-     AEENDMO = input(scan(DATE_OF_RESOLUTION,1,' '),best8.);
-     AEENDYR = input(scan(DATE_OF_RESOLUTION,3,' '),best8.);
+  if DATE_OF_RESOLUTION ne '--' then do;
+     AEENDDY = input(scan(DATE_OF_RESOLUTION,2,'/'),best8.);
+     AEENDMO = input(scan(DATE_OF_RESOLUTION,1,'/'),best8.);
+     AEENDYR = input(scan(DATE_OF_RESOLUTION,3,'/'),best8.);
   AEEDT = mdy(AEENDMO, AEENDDY, AEENDYR);
+  format AEEDT date9.;
   end;
   if DATE_OF_RESOLUTION eq '--' then AEEDT = .;
 
   if AESDT ne . and AEEDT ne . then AEDUR = AEEDT - AESDT + 1;
 
-  AETERM = DESCRIP;
-  keep SUBJID AESDT AEEDT AEDUR;
+  if Description ne ' ' then AETERM = Description;
+  if Description eq ' ' then AETERM = "None";
+  
+  keep SUBJID AESDT AEEDT AEDUR AETERM;
 run;
 
 proc sort data=ae;
@@ -146,24 +149,28 @@ proc sort data=all1;
 run;
 
 data out.miniproj2;
-  label SUBJID = 'Unique Subject Identifier'
-        BRTHDT = 'Birth Date'
-		AGE    = 'Age'
+  label SUBJID = 'Subject ID'
+        BRTHDT = 'Date of Birth '
+		AGE    = 'Age (Years)'
 		AGECAT = 'Age Category'
 		RACE   = 'Race'
-		SEX    = 'Gender'
+		SEX    = 'Sex'
 		ETHNIC = 'Ethnicity'
 		TRTSDT = 'Treatment Start Date'
 		TRTEDT = 'Treatment End Date'
-		TRTDUR = 'Treatment Duration (Days)'
+		TRTDUR = 'Duration of Treatment (Days)'
 		AESDT  = 'Adverse Event Start Date'
 		AEEDT  = 'Adverse Event End Date'
-		AEDY   = 'Adverse Event Start Day'
+		AEDY   = 'Adverse Event Relative Day'
 		AETRTEM = 'Treatment Emergent Flag'
-		AEDUR  = 'Adverse Event Duration'
+		AEDUR  = 'AE Duration (Days)'
 		AETERM = 'Adverse Event Term'
 	;
-  set all;
+  set all1;
+run;
+
+proc compare base=out.miniproj2
+             compare=out.adae novalues;
 run;
 
 quit;
